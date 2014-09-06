@@ -24,6 +24,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CocoaLumberjack/CocoaLumberjack.h>
 
 // TODO: Add customization flags to conditionally include addtional information
 @interface RMLogFormatter : NSObject <DDLogFormatter>
