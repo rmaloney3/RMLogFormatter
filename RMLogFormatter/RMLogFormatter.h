@@ -27,4 +27,6 @@
 
 @interface RMInfoFormatter : NSObject <DDLogFormatter>
 
+- (instancetype)initWithLogLineLength:(NSUInteger)logLineLength;
+
 @end

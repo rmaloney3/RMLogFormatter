@@ -31,8 +31,25 @@
 @end
 
 @implementation RMLogFormatter {
+    NSUInteger lineLength;
     int atomicLoggerCount;
     NSDateFormatter *threadUnsafeDateFormatter;
+}
+
+- (instancetype)initWithLogLineLength:(NSUInteger)logLineLength {
+    if (self = [super init]) {
+        lineLength = logLineLength;
+    }
+    
+    return self;
+}
+
+- (instancetype)init {
+    if (self = [super init]) {
+        lineLength = 120;
+    }
+    
+    return self;
 }
 
 - (NSString *)stringFromDate:(NSDate *)date {
@@ -70,6 +87,47 @@
     }
 }
 
+- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length indentLength:(NSUInteger)indentLength {
+    BOOL isMultiline = (sourceString.length > length);
+    
+    if (!isMultiline) {
+        return sourceString;
+    }
+    
+    NSUInteger firstLineLength = length;
+    NSUInteger maxLineLength = firstLineLength;
+    
+    char spacesUtf8[indentLength + 1];
+    memset(spacesUtf8, ' ', indentLength * sizeof(*spacesUtf8));
+    spacesUtf8[indentLength] = '\0';
+    NSString *indentString = [NSString stringWithFormat:@"\n%s", spacesUtf8];
+    
+    NSMutableString *resultString = [[NSMutableString alloc] init];
+    NSMutableString *currentLine = [[NSMutableString alloc] init];
+    NSScanner *scanner = [NSScanner scannerWithString:sourceString];
+    NSString *scannedString = nil;
+    while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString: &scannedString]) {
+        if ([currentLine length] + [scannedString length] <= maxLineLength) {
+            [currentLine appendFormat:@"%@ ", scannedString];
+        }
+        else if ([currentLine length] == 0) { // Newline but next word > currentLineLength
+            [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
+            maxLineLength = length - indentLength;
+        }
+        else { // Need to break line and start new one
+            [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
+            [currentLine setString:[NSString stringWithFormat:@"%@ ", scannedString]];
+            maxLineLength = length - indentLength;
+        }
+        
+        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    }
+    
+    [resultString appendString:currentLine];
+    
+    return resultString;
+}
+
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
     NSString *logLevel;
     switch (logMessage->logFlag) {
@@ -97,7 +155,11 @@
     NSString *logStats = [NSString stringWithFormat:@"%@ | %@ | %@ | %@", logLevel, dateAndTime, thread, location];
     NSString *fullLogMsg = [NSString stringWithFormat:@"%@ | %@", logStats, logMessage->logMsg];
     
-    return fullLogMsg;
+    NSUInteger statsLength = logStats.length;
+    
+    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength indentLength:statsLength + 3];
+    
+    return wordWrappedLogMessage;
 }
 
 - (void)didAddToLogger:(id <DDLogger>)logger {
