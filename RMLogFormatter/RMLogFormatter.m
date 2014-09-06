@@ -55,7 +55,7 @@
 // TODO: Convert to NSString Category
 - (NSString *)stringFromDate:(NSDate *)date {
     int32_t loggerCount = OSAtomicAdd32(0, &atomicLoggerCount);
-    NSString *dateFormatString = @"yyyy/MM/dd HH:mm:ss:SSS";
+    NSString *dateFormatString = @"yyyy-MM-dd HH:mm:ss.SSS";
     
     if (loggerCount <= 1) {
         // Single-threaded mode.
@@ -140,36 +140,35 @@
 }
 
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
-    NSString *logLevel;
-    switch (logMessage->logFlag) {
-        case LOG_FLAG_ERROR:
-            logLevel = @"E";
-            break;
-        case LOG_FLAG_WARN:
-            logLevel = @"W";
-            break;
-        case LOG_FLAG_INFO:
-            logLevel = @"I";
-            break;
-        case LOG_FLAG_DEBUG:
-            logLevel = @"D";
-            break;
-        default:
-            logLevel = @"V";
-            break;
-    }
+    //    NSString *logLevel;
+    //    switch (logMessage->logFlag) {
+    //        case LOG_FLAG_ERROR:
+    //            logLevel = @"E";
+    //            break;
+    //        case LOG_FLAG_WARN:
+    //            logLevel = @"W";
+    //            break;
+    //        case LOG_FLAG_INFO:
+    //            logLevel = @"I";
+    //            break;
+    //        case LOG_FLAG_DEBUG:
+    //            logLevel = @"D";
+    //            break;
+    //        default:
+    //            logLevel = @"V";
+    //            break;
+    //    }
     
     NSString *dateAndTime = [self stringFromDate:(logMessage->timestamp)];
-    NSString *thread = [NSString stringWithFormat:@"TID:%d", logMessage->machThreadID];
-    NSString *location = [NSString stringWithFormat:@"%@:%d",logMessage.fileName, logMessage->lineNumber];
-    NSString *locationWithBuffer = [NSString stringWithFormat:@"%@%@", location, [self stringByRepeatingCharacter:' ' length:24 - location.length]];
+    NSString *location = [NSString stringWithFormat:@"%@:%d (TID:%@)",logMessage.fileName, logMessage->lineNumber, logMessage.threadID];
     
-    NSString *logStats = [NSString stringWithFormat:@"%@ | %@ | %@ | %@", logLevel, dateAndTime, thread, locationWithBuffer];
-    NSString *fullLogMsg = [NSString stringWithFormat:@"%@ | %@", logStats, logMessage->logMsg];
+    NSString *logStats1 = [NSString stringWithFormat:@"%@ | ", dateAndTime];
+    NSString *logStats2 = [NSString stringWithFormat:@"%@ ", location];
+    NSString *fullLogMsg = [NSString stringWithFormat:@"%@%@: %@", logStats1, logStats2, logMessage->logMsg];
     
-    NSUInteger statsLength = logStats.length;
+    NSUInteger indentLength = logStats1.length + 8;
     
-    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength indentLength:statsLength + 3];
+    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength indentLength:indentLength];
     
     return wordWrappedLogMessage;
 }
