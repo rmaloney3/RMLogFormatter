@@ -52,6 +52,7 @@
     return self;
 }
 
+// TODO: Convert to NSString Category
 - (NSString *)stringFromDate:(NSDate *)date {
     int32_t loggerCount = OSAtomicAdd32(0, &atomicLoggerCount);
     NSString *dateFormatString = @"yyyy/MM/dd HH:mm:ss:SSS";
@@ -87,6 +88,17 @@
     }
 }
 
+// TODO: Convert to NSString Category
+- (NSString *)stringByRepeatingCharacter:(char)character length:(NSUInteger)length {
+    char stringUtf8[length + 1];
+    memset(stringUtf8, character, length * sizeof(*stringUtf8));
+    stringUtf8[length] = '\0';
+    
+    return [NSString stringWithUTF8String:stringUtf8];
+}
+
+// TODO: Convert to NSString Category
+// TODO: Remove indentLength, add columnsSeperatedByCharacter or something similar
 - (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length indentLength:(NSUInteger)indentLength {
     BOOL isMultiline = (sourceString.length > length);
     
@@ -94,21 +106,18 @@
         return sourceString;
     }
     
-    NSUInteger firstLineLength = length;
-    NSUInteger maxLineLength = firstLineLength;
+    NSUInteger maxLineLength = length;
     
-    char spacesUtf8[indentLength + 1];
-    memset(spacesUtf8, ' ', indentLength * sizeof(*spacesUtf8));
-    spacesUtf8[indentLength] = '\0';
-    NSString *indentString = [NSString stringWithFormat:@"\n%s", spacesUtf8];
+    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:indentLength]];
     
     NSMutableString *resultString = [[NSMutableString alloc] init];
     NSMutableString *currentLine = [[NSMutableString alloc] init];
     NSScanner *scanner = [NSScanner scannerWithString:sourceString];
+    scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
     NSString *scannedString = nil;
     while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString: &scannedString]) {
         if ([currentLine length] + [scannedString length] <= maxLineLength) {
-            [currentLine appendFormat:@"%@ ", scannedString];
+            [currentLine appendString:scannedString];
         }
         else if ([currentLine length] == 0) { // Newline but next word > currentLineLength
             [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
@@ -116,11 +125,13 @@
         }
         else { // Need to break line and start new one
             [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
-            [currentLine setString:[NSString stringWithFormat:@"%@ ", scannedString]];
+            [currentLine setString:[NSString stringWithString:scannedString]];
             maxLineLength = length - indentLength;
         }
         
-        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceCharacterSet] invertedSet] intoString:&scannedString]) {
+            [currentLine appendString:scannedString];
+        }
     }
     
     [resultString appendString:currentLine];
@@ -151,8 +162,9 @@
     NSString *dateAndTime = [self stringFromDate:(logMessage->timestamp)];
     NSString *thread = [NSString stringWithFormat:@"TID:%d", logMessage->machThreadID];
     NSString *location = [NSString stringWithFormat:@"%@:%d",logMessage.fileName, logMessage->lineNumber];
+    NSString *locationWithBuffer = [NSString stringWithFormat:@"%@%@", location, [self stringByRepeatingCharacter:' ' length:24 - location.length]];
     
-    NSString *logStats = [NSString stringWithFormat:@"%@ | %@ | %@ | %@", logLevel, dateAndTime, thread, location];
+    NSString *logStats = [NSString stringWithFormat:@"%@ | %@ | %@ | %@", logLevel, dateAndTime, thread, locationWithBuffer];
     NSString *fullLogMsg = [NSString stringWithFormat:@"%@ | %@", logStats, logMessage->logMsg];
     
     NSUInteger statsLength = logStats.length;
