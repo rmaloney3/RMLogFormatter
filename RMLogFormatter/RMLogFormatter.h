@@ -26,7 +26,7 @@
 #import <Foundation/Foundation.h>
 
 // TODO: Add customization flags to conditionally include addtional information
-@interface RMInfoFormatter : NSObject <DDLogFormatter>
+@interface RMLogFormatter : NSObject <DDLogFormatter>
 
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength;
 
