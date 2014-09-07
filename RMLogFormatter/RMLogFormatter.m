@@ -26,51 +26,89 @@
 #import "RMLogFormatter.h"
 #import <libkern/OSAtomic.h>
 
+static const NSUInteger RMLF_DEFAULT_LINE_LENGTH = 120;
+static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOptionsNone |
+                                                            RMLogFormatterOptionsWordWrap |
+                                                            RMLogFormatterOptionsTimestampLong |
+                                                            RMLogFormatterOptionsFileName |
+                                                            RMLogFormatterOptionsLineNumber |
+                                                            RMLogFormatterOptionsThreadID;
+
 @interface RMLogFormatter ()
 
 @end
 
 @implementation RMLogFormatter {
-    NSUInteger lineLength;
-    int atomicLoggerCount;
-    NSDateFormatter *threadUnsafeDateFormatter;
+    int _atomicLoggerCount;
+    
+    RMLogFormatterOptions _logOptions;
+    NSUInteger _lineLength;
+    
+    NSString *_dateFormatString;
+    NSDateFormatter *_threadUnsafeDateFormatter;
+}
+
+#pragma mark - Initializers
+
+- (instancetype)init {
+    return [self initWithLogLineLength:RMLF_DEFAULT_LINE_LENGTH options:RMLF_DEFAULT_OPTIONS];
 }
 
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength {
+    return [self initWithLogLineLength:logLineLength options:RMLF_DEFAULT_OPTIONS];
+}
+
+- (instancetype)initWithOptions:(RMLogFormatterOptions)options {
+    return [self initWithLogLineLength:RMLF_DEFAULT_LINE_LENGTH options:options];
+}
+
+- (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options {
     if (self = [super init]) {
-        if (logLineLength < 80) {
-            lineLength = 80;
+        _logOptions = options;
+        
+        // Ensure minimum line length boundary is not exceeded.
+        _lineLength = (logLineLength < 80) ? 80 : logLineLength;
+        
+        if (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong)) {
+            if (_logOptions & RMLogFormatterOptionsTimestampShort) {
+                _dateFormatString = @"HH:mm:ss.SSS";
+            } else {
+                _dateFormatString = @"yyyy-MM-dd HH:mm:ss.SSS";
+            }
         } else {
-            lineLength = logLineLength;
+            _dateFormatString = nil;
         }
     }
     
     return self;
 }
 
-- (instancetype)init {
-    if (self = [super init]) {
-        lineLength = 120;
-    }
-    
-    return self;
+#pragma mark - Public Property Accessors
+
+- (RMLogFormatterOptions)options {
+    return _logOptions;
 }
+
+- (NSUInteger)lineLength {
+    return _lineLength;
+}
+
+#pragma mark - Private
 
 // TODO: Convert to NSString Category
 - (NSString *)stringFromDate:(NSDate *)date {
-    int32_t loggerCount = OSAtomicAdd32(0, &atomicLoggerCount);
-    NSString *dateFormatString = @"yyyy-MM-dd HH:mm:ss.SSS";
+    int32_t loggerCount = OSAtomicAdd32(0, &_atomicLoggerCount);
     
     if (loggerCount <= 1) {
         // Single-threaded mode.
         
-        if (threadUnsafeDateFormatter == nil) {
-            threadUnsafeDateFormatter = [[NSDateFormatter alloc] init];
-            [threadUnsafeDateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-            [threadUnsafeDateFormatter setDateFormat:dateFormatString];
+        if (_threadUnsafeDateFormatter == nil) {
+            _threadUnsafeDateFormatter = [[NSDateFormatter alloc] init];
+            [_threadUnsafeDateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+            [_threadUnsafeDateFormatter setDateFormat:_dateFormatString];
         }
         
-        return [threadUnsafeDateFormatter stringFromDate:date];
+        return [_threadUnsafeDateFormatter stringFromDate:date];
     } else {
         // Multi-threaded mode.
         // NSDateFormatter is NOT thread-safe.
@@ -83,7 +121,7 @@
         if (dateFormatter == nil) {
             dateFormatter = [[NSDateFormatter alloc] init];
             [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-            [dateFormatter setDateFormat:dateFormatString];
+            [dateFormatter setDateFormat:_dateFormatString];
             
             [threadDictionary setObject:dateFormatter forKey:key];
         }
@@ -101,7 +139,7 @@
     return [NSString stringWithUTF8String:stringUtf8];
 }
 
-- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length firstIndentLength:(NSUInteger)firstIndentLength secondIndentLength:(NSUInteger)secondIndentLength {
+- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length indentLength:(NSUInteger)indentLength {
     BOOL isMultiline = ((sourceString.length > length) || [sourceString containsString:@"\n"]);
     
     if (!isMultiline) {
@@ -110,11 +148,11 @@
     
     NSUInteger maxLineLength = length;
     
-    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:firstIndentLength]];
+    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:indentLength]];
     
-    NSMutableString *resultString = [[NSMutableString alloc] initWithFormat:@"%@%@", [sourceString substringToIndex:secondIndentLength], indentString];
+    NSMutableString *resultString = [[NSMutableString alloc] init];
     NSMutableString *currentLine = [[NSMutableString alloc] init];
-    NSScanner *scanner = [NSScanner scannerWithString:[sourceString substringFromIndex:secondIndentLength]];
+    NSScanner *scanner = [NSScanner scannerWithString:sourceString];
     scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
     NSString *scannedString = nil;
     while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString: &scannedString]) {
@@ -123,12 +161,12 @@
         }
         else if ([currentLine length] == 0) { // Newline but next word > currentLineLength
             [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
-            maxLineLength = length - firstIndentLength;
+            maxLineLength = length - indentLength;
         }
         else { // Need to break line and start new one
             [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
             [currentLine setString:[NSString stringWithString:scannedString]];
-            maxLineLength = length - firstIndentLength;
+            maxLineLength = length - indentLength;
         }
         
         if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceCharacterSet] invertedSet] intoString:&scannedString]) {
@@ -138,7 +176,7 @@
         if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet newlineCharacterSet] invertedSet] intoString:&scannedString]) {
             [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
             [currentLine setString:@""];
-            maxLineLength = length - firstIndentLength;
+            maxLineLength = length - indentLength;
         }
     }
     
@@ -147,47 +185,120 @@
     return resultString;
 }
 
+#pragma mark - DDLogFormatter Protocol
+
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
-    //    NSString *logLevel;
-    //    switch (logMessage->logFlag) {
-    //        case LOG_FLAG_ERROR:
-    //            logLevel = @"E";
-    //            break;
-    //        case LOG_FLAG_WARN:
-    //            logLevel = @"W";
-    //            break;
-    //        case LOG_FLAG_INFO:
-    //            logLevel = @"I";
-    //            break;
-    //        case LOG_FLAG_DEBUG:
-    //            logLevel = @"D";
-    //            break;
-    //        default:
-    //            logLevel = @"V";
-    //            break;
-    //    }
+    if (_logOptions == RMLogFormatterOptionsNone) {
+        return [NSString stringWithFormat:@"%@", logMessage->logMsg];
+    }
     
-    NSString *dateAndTime = [self stringFromDate:(logMessage->timestamp)];
-    NSString *location = [NSString stringWithFormat:@"%@:%d (TID:%@)",logMessage.fileName, logMessage->lineNumber, logMessage.threadID];
+    NSMutableString *logStats = [NSMutableString string];
     
-    NSString *logStats1 = [NSString stringWithFormat:@"%@ | ", dateAndTime];
-    NSString *logStats2 = [NSString stringWithFormat:@"%@ ", location];
-    NSString *fullLogMsg = [NSString stringWithFormat:@"%@%@: %@", logStats1, logStats2, logMessage->logMsg];
+    BOOL timestampEnabled = (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong));
+    BOOL logFlagEnabled = (_logOptions & (RMLogFormatterOptionsLogFlagShort | RMLogFormatterOptionsLogFlagLong));
+    BOOL fileNameEnabled = (_logOptions & RMLogFormatterOptionsFileName);
+    BOOL methodNameEnabled = (_logOptions & RMLogFormatterOptionsMethodName);
+    BOOL lineNumbersEnabled = (_logOptions & RMLogFormatterOptionsLineNumber);
+    BOOL threadNameEnabled = (_logOptions & RMLogFormatterOptionsThreadName) && logMessage->threadName.length;
+    BOOL threadIDEnabled = (_logOptions & RMLogFormatterOptionsThreadID);
     
-    NSUInteger indentLength1 = logStats1.length + 1;
-    NSUInteger indentLength2 = logStats1.length + logStats2.length + 2;
+    if (timestampEnabled) {
+        [logStats appendString:[self stringFromDate:logMessage->timestamp]];
+    }
     
-    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength firstIndentLength:indentLength1 secondIndentLength:indentLength2];
+    if (logFlagEnabled) {
+        NSString *logFlag = @"";
+        switch (logMessage->logFlag) {
+            case LOG_FLAG_ERROR:
+                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"E" : @"  Error";
+                break;
+            case LOG_FLAG_WARN:
+                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"W" : @"   Warn";
+                break;
+            case LOG_FLAG_INFO:
+                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"I" : @"   Info";
+                break;
+            case LOG_FLAG_DEBUG:
+                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"D" : @"  Debug";
+                break;
+            case LOG_FLAG_VERBOSE:
+                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"V" : @"Verbose";
+                break;
+        }
+        
+        if (timestampEnabled) {
+            [logStats appendFormat:@" | %@", logFlag];
+        } else {
+            [logStats appendString:logFlag];
+        }
+    }
     
-    return wordWrappedLogMessage;
+    if (fileNameEnabled && !methodNameEnabled) {
+        if (timestampEnabled | logFlagEnabled) {
+            [logStats appendFormat:@" | %@", logMessage.fileName];
+        } else {
+            [logStats appendString:logMessage.fileName];
+        }
+    }
+    
+    if (methodNameEnabled) {
+        if (timestampEnabled | logFlagEnabled | fileNameEnabled) {
+            [logStats appendFormat:@" | %@", logMessage.methodName];
+        } else {
+            [logStats appendString:logMessage.methodName];
+        }
+    }
+    
+    if (lineNumbersEnabled) {
+        if (fileNameEnabled | methodNameEnabled) {
+            [logStats appendFormat:@":%d", logMessage->lineNumber];
+        } else if (timestampEnabled | logFlagEnabled) {
+            [logStats appendFormat:@" | Line:%d", logMessage->lineNumber];
+        } else {
+            [logStats appendFormat:@"Line:%d", logMessage->lineNumber];
+        }
+    }
+    
+    if (threadNameEnabled) {
+        if (fileNameEnabled | methodNameEnabled | lineNumbersEnabled) {
+            [logStats appendFormat:@" Thread:%@", logMessage->threadName];
+        } else if (timestampEnabled | logFlagEnabled) {
+            [logStats appendFormat:@" | Thread:%@", logMessage->threadName];
+        } else {
+            [logStats appendFormat:@"Thread:%@", logMessage->threadName];
+        }
+    }
+    
+    if (threadIDEnabled) {
+        if (threadNameEnabled) {
+            [logStats appendFormat:@"(%@)", logMessage.threadID];
+        } else if (fileNameEnabled | methodNameEnabled | lineNumbersEnabled) {
+            [logStats appendFormat:@" (TID:%@)", logMessage.threadID];
+        } else if (timestampEnabled | logFlagEnabled) {
+            [logStats appendFormat:@" | (TID:%@)", logMessage.threadID];
+        } else {
+            [logStats appendFormat:@"(TID:%@)", logMessage.threadID];
+        }
+    }
+    
+    NSString *fullLogMessage = [NSString stringWithFormat:@"%@ : %@", logStats, logMessage->logMsg];
+    
+    if (_logOptions & RMLogFormatterOptionsWordWrap) {
+        // FIXME: If indentLength is longer than _lineLength word wrap over-indents.
+        NSUInteger indentLength = logStats.length + 3;
+        
+        fullLogMessage = [self wrapString:fullLogMessage withLineLength:_lineLength indentLength:indentLength];
+    }
+    
+    return fullLogMessage;
 }
 
 - (void)didAddToLogger:(id <DDLogger>)logger {
-    OSAtomicIncrement32(&atomicLoggerCount);
+    OSAtomicIncrement32(&_atomicLoggerCount);
 }
 
 - (void)willRemoveFromLogger:(id <DDLogger>)logger {
-    OSAtomicDecrement32(&atomicLoggerCount);
+    OSAtomicDecrement32(&_atomicLoggerCount);
 }
 
 @end
