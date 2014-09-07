@@ -101,10 +101,8 @@
     return [NSString stringWithUTF8String:stringUtf8];
 }
 
-// TODO: Convert to NSString Category
-// TODO: Remove indentLength, add columnsSeperatedByCharacter or something similar
-- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length indentLength:(NSUInteger)indentLength {
-    BOOL isMultiline = (sourceString.length > length);
+- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length firstIndentLength:(NSUInteger)firstIndentLength secondIndentLength:(NSUInteger)secondIndentLength {
+    BOOL isMultiline = ((sourceString.length > length) || [sourceString containsString:@"\n"]);
     
     if (!isMultiline) {
         return sourceString;
@@ -112,29 +110,35 @@
     
     NSUInteger maxLineLength = length;
     
-    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:indentLength]];
+    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:firstIndentLength]];
     
-    NSMutableString *resultString = [[NSMutableString alloc] init];
+    NSMutableString *resultString = [[NSMutableString alloc] initWithFormat:@"%@%@", [sourceString substringToIndex:secondIndentLength], indentString];
     NSMutableString *currentLine = [[NSMutableString alloc] init];
-    NSScanner *scanner = [NSScanner scannerWithString:sourceString];
+    NSScanner *scanner = [NSScanner scannerWithString:[sourceString substringFromIndex:secondIndentLength]];
     scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
     NSString *scannedString = nil;
-    while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString: &scannedString]) {
+    while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString: &scannedString]) {
         if ([currentLine length] + [scannedString length] <= maxLineLength) {
             [currentLine appendString:scannedString];
         }
         else if ([currentLine length] == 0) { // Newline but next word > currentLineLength
             [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
-            maxLineLength = length - indentLength;
+            maxLineLength = length - firstIndentLength;
         }
         else { // Need to break line and start new one
             [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
             [currentLine setString:[NSString stringWithString:scannedString]];
-            maxLineLength = length - indentLength;
+            maxLineLength = length - firstIndentLength;
         }
         
         if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceCharacterSet] invertedSet] intoString:&scannedString]) {
             [currentLine appendString:scannedString];
+        }
+        
+        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet newlineCharacterSet] invertedSet] intoString:&scannedString]) {
+            [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
+            [currentLine setString:@""];
+            maxLineLength = length - firstIndentLength;
         }
     }
     
@@ -170,9 +174,10 @@
     NSString *logStats2 = [NSString stringWithFormat:@"%@ ", location];
     NSString *fullLogMsg = [NSString stringWithFormat:@"%@%@: %@", logStats1, logStats2, logMessage->logMsg];
     
-    NSUInteger indentLength = logStats1.length + 8;
+    NSUInteger indentLength1 = logStats1.length + 1;
+    NSUInteger indentLength2 = logStats1.length + logStats2.length + 2;
     
-    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength indentLength:indentLength];
+    NSString *wordWrappedLogMessage = [self wrapString:fullLogMsg withLineLength:lineLength firstIndentLength:indentLength1 secondIndentLength:indentLength2];
     
     return wordWrappedLogMessage;
 }
