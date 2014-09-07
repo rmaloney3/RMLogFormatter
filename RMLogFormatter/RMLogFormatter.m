@@ -38,7 +38,11 @@
 
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength {
     if (self = [super init]) {
-        lineLength = logLineLength;
+        if (logLineLength < 80) {
+            lineLength = 80;
+        } else {
+            lineLength = logLineLength;
+        }
     }
     
     return self;
