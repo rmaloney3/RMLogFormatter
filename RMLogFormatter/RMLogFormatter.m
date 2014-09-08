@@ -169,14 +169,15 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
             maxLineLength = length - indentLength;
         }
         
-        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceCharacterSet] invertedSet] intoString:&scannedString]) {
-            [currentLine appendString:scannedString];
-        }
-        
-        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet newlineCharacterSet] invertedSet] intoString:&scannedString]) {
-            [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
-            [currentLine setString:@""];
-            maxLineLength = length - indentLength;
+        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet] intoString:&scannedString]) {
+            if ([scannedString containsString:@"\n"]) {
+                [currentLine appendString:[scannedString stringByReplacingOccurrencesOfString:@"\n" withString:indentString]];
+                [resultString appendString:currentLine];
+                [currentLine setString:@""];
+                maxLineLength = length - indentLength;
+            } else {
+                [currentLine appendString:scannedString];
+            }
         }
     }
     
