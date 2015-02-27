@@ -24,7 +24,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CocoaLumberjack/CocoaLumberjack.h>
+#import "DDLog.h"
 
 typedef NS_OPTIONS(NSInteger, RMLogFormatterOptions) {
     RMLogFormatterOptionsNone           = 0,

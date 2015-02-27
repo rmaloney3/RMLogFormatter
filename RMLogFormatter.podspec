@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
 
                        * yyyy-MM-dd HH:mm:ss.SSS | FILENAME:LINE_NUMBER (TID:THREAD_ID) : LOG_MESSAGE
                        DESC
-  s.homepage           = "https://github.com/rmaloney3"
+  s.homepage           = "https://github.com/rmaloney3/RMLogFormatter"
   s.license            = { :type => 'MIT', :file => 'LICENSE' }
   s.author             = { "Ryan Maloney" => "ryan_maloney@me.com" }
   s.source             = { :git => "https://github.com/rmaloney3/RMLogFormatter.git", :tag => s.version.to_s }
@@ -19,5 +19,4 @@ Pod::Spec.new do |s|
   s.source_files       = 'RMLogFormatter/*{m,h}'
 
   s.dependency 'CocoaLumberjack', '~> 1.9'
-
 end
