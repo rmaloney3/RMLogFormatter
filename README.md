@@ -1,5 +1,7 @@
 # RMLogFormatter
 
+[![Build Status](https://travis-ci.org/rmaloney3/RMLogFormatter.svg?branch=master)](https://travis-ci.org/rmaloney3/RMLogFormatter)
+
 `RMLogFormatter` is a customizable log formatter for CocoaLumberjack.  The default log format is as follows:
 
     yyyy-MM-dd HH:mm:ss.SSS | FILENAME:LINE_NUMBER (TID:THREAD_ID) : LOG_MESSAGE
