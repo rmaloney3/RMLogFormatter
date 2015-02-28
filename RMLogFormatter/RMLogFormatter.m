@@ -190,7 +190,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
 
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
     if (_logOptions == RMLogFormatterOptionsNone) {
-        return [NSString stringWithFormat:@"%@", logMessage->logMsg];
+        return [NSString stringWithFormat:@"%@", logMessage.message];
     }
     
     NSMutableString *logStats = [NSMutableString string];
@@ -200,29 +200,29 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     BOOL fileNameEnabled = (_logOptions & RMLogFormatterOptionsFileName);
     BOOL methodNameEnabled = (_logOptions & RMLogFormatterOptionsMethodName);
     BOOL lineNumbersEnabled = (_logOptions & RMLogFormatterOptionsLineNumber);
-    BOOL threadNameEnabled = (_logOptions & RMLogFormatterOptionsThreadName) && logMessage->threadName.length;
+    BOOL threadNameEnabled = (_logOptions & RMLogFormatterOptionsThreadName) && logMessage.threadName.length;
     BOOL threadIDEnabled = (_logOptions & RMLogFormatterOptionsThreadID);
     
     if (timestampEnabled) {
-        [logStats appendString:[self stringFromDate:logMessage->timestamp]];
+        [logStats appendString:[self stringFromDate:logMessage.timestamp]];
     }
     
     if (logFlagEnabled) {
         NSString *logFlag = @"";
-        switch (logMessage->logFlag) {
-            case LOG_FLAG_ERROR:
+        switch (logMessage.flag) {
+            case DDLogFlagError:
                 logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"E" : @"  Error";
                 break;
-            case LOG_FLAG_WARN:
+            case DDLogFlagWarning:
                 logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"W" : @"   Warn";
                 break;
-            case LOG_FLAG_INFO:
+            case DDLogFlagInfo:
                 logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"I" : @"   Info";
                 break;
-            case LOG_FLAG_DEBUG:
+            case DDLogFlagDebug:
                 logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"D" : @"  Debug";
                 break;
-            case LOG_FLAG_VERBOSE:
+            case DDLogFlagVerbose:
                 logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"V" : @"Verbose";
                 break;
         }
@@ -244,29 +244,29 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     
     if (methodNameEnabled) {
         if (timestampEnabled | logFlagEnabled | fileNameEnabled) {
-            [logStats appendFormat:@" | %@", logMessage.methodName];
+            [logStats appendFormat:@" | %@", logMessage.function];
         } else {
-            [logStats appendString:logMessage.methodName];
+            [logStats appendString:logMessage.function];
         }
     }
     
     if (lineNumbersEnabled) {
         if (fileNameEnabled | methodNameEnabled) {
-            [logStats appendFormat:@":%d", logMessage->lineNumber];
+            [logStats appendFormat:@":%lu", logMessage.line];
         } else if (timestampEnabled | logFlagEnabled) {
-            [logStats appendFormat:@" | Line:%d", logMessage->lineNumber];
+            [logStats appendFormat:@" | Line:%lu", logMessage.line];
         } else {
-            [logStats appendFormat:@"Line:%d", logMessage->lineNumber];
+            [logStats appendFormat:@"Line:%lu", logMessage.line];
         }
     }
     
     if (threadNameEnabled) {
         if (fileNameEnabled | methodNameEnabled | lineNumbersEnabled) {
-            [logStats appendFormat:@" Thread:%@", logMessage->threadName];
+            [logStats appendFormat:@" Thread:%@", logMessage.threadName];
         } else if (timestampEnabled | logFlagEnabled) {
-            [logStats appendFormat:@" | Thread:%@", logMessage->threadName];
+            [logStats appendFormat:@" | Thread:%@", logMessage.threadName];
         } else {
-            [logStats appendFormat:@"Thread:%@", logMessage->threadName];
+            [logStats appendFormat:@"Thread:%@", logMessage.threadName];
         }
     }
     
@@ -282,7 +282,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
         }
     }
     
-    NSString *fullLogMessage = [NSString stringWithFormat:@"%@ : %@", logStats, logMessage->logMsg];
+    NSString *fullLogMessage = [NSString stringWithFormat:@"%@ : %@", logStats, logMessage.message];
     
     if (_logOptions & RMLogFormatterOptionsWordWrap) {
         // FIXME: If indentLength is longer than _lineLength word wrap over-indents.

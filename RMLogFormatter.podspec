@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
 
   s.source_files       = 'RMLogFormatter/*{m,h}'
 
-  s.dependency 'CocoaLumberjack', '~> 1.9'
+  s.dependency 'CocoaLumberjack'
 end
