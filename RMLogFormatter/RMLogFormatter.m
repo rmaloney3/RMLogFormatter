@@ -273,7 +273,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
         }
     }
     
-    if (fileNameEnabled && !methodNameEnabled) {
+    if (fileNameEnabled) {
         if (timestampEnabled | logFlagEnabled) {
             [logStats appendFormat:@" | %@", logMessage.fileName];
         } else {
@@ -282,7 +282,9 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     }
     
     if (methodNameEnabled) {
-        if (timestampEnabled | logFlagEnabled | fileNameEnabled) {
+        if (fileNameEnabled) {
+            [logStats appendFormat:@".%@", logMessage.function];
+        } else if (timestampEnabled | logFlagEnabled) {
             [logStats appendFormat:@" | %@", logMessage.function];
         } else {
             [logStats appendString:logMessage.function];
