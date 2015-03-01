@@ -7,7 +7,7 @@ PODS:
     - CocoaLumberjack/Core
   - CocoaLumberjack/Extensions (2.0.0-rc2):
     - CocoaLumberjack/Default
-  - RMLogFormatter (0.0.3):
+  - RMLogFormatter (0.1.0):
     - CocoaLumberjack
 
 DEPENDENCIES:
@@ -19,6 +19,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   CocoaLumberjack: 6027cd9a0665203a7df456c526e137f02cd547e1
-  RMLogFormatter: 5f3c2099675844dede447f82b9066c7edad0464f
+  RMLogFormatter: b4ea4f766beb4c8b229c4eecbedc525d058369ca
 
 COCOAPODS: 0.34.4

@@ -27,13 +27,14 @@
 
 #import "RMLogFormatter.h"
 
-static const NSUInteger RMLF_DEFAULT_LINE_LENGTH = 120;
-static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOptionsNone |
-                                                            RMLogFormatterOptionsWordWrap |
-                                                            RMLogFormatterOptionsTimestampLong |
-                                                            RMLogFormatterOptionsFileName |
-                                                            RMLogFormatterOptionsLineNumber |
-                                                            RMLogFormatterOptionsThreadID;
+static const NSUInteger RMLogFormatterMinimumLineLength = 80;
+static const NSUInteger RMLogFormatterDefaultLineLength = 120;
+static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatterOptionsNone |
+                                                                    RMLogFormatterOptionsWordWrap |
+                                                                    RMLogFormatterOptionsTimestampLong |
+                                                                    RMLogFormatterOptionsFileName |
+                                                                    RMLogFormatterOptionsLineNumber |
+                                                                    RMLogFormatterOptionsThreadID;
 
 @implementation RMLogFormatter {
     int _atomicLoggerCount;
@@ -48,21 +49,21 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
 #pragma mark - Initializers
 
 - (instancetype)init {
-    return [self initWithLogLineLength:RMLF_DEFAULT_LINE_LENGTH options:RMLF_DEFAULT_OPTIONS];
+    return [self initWithLogLineLength:RMLogFormatterDefaultLineLength options:RMLogFormatterDefaultOptions];
 }
 
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength {
-    return [self initWithLogLineLength:logLineLength options:RMLF_DEFAULT_OPTIONS];
+    return [self initWithLogLineLength:logLineLength options:RMLogFormatterDefaultOptions];
 }
 
 - (instancetype)initWithOptions:(RMLogFormatterOptions)options {
-    return [self initWithLogLineLength:RMLF_DEFAULT_LINE_LENGTH options:options];
+    return [self initWithLogLineLength:RMLogFormatterDefaultLineLength options:options];
 }
 
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options {
     if (self = [super init]) {
         _logOptions = options;
-        _lineLength = (logLineLength < 80) ? 80 : logLineLength;
+        _lineLength = (logLineLength < RMLogFormatterMinimumLineLength) ? RMLogFormatterMinimumLineLength : logLineLength;
         
         if (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong)) {
             if (_logOptions & RMLogFormatterOptionsTimestampShort) {
