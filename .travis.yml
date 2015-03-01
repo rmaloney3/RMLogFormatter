@@ -1,1 +1,3 @@
 language: objective-c
+xcode_workspace: CustomLogFormatting/CustomLogFormatting.xcworkspace
+podfile: CustomLogFormatting/Podfile
