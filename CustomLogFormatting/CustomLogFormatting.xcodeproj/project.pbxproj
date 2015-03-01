@@ -13,19 +13,8 @@
 		2EE9B5161AA00CF100AC41D5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2EE9B5141AA00CF100AC41D5 /* Main.storyboard */; };
 		2EE9B5181AA00CF100AC41D5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2EE9B5171AA00CF100AC41D5 /* Images.xcassets */; };
 		2EE9B51B1AA00CF100AC41D5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2EE9B5191AA00CF100AC41D5 /* LaunchScreen.xib */; };
-		2EE9B5271AA00CF100AC41D5 /* CustomLogFormattingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2EE9B5261AA00CF100AC41D5 /* CustomLogFormattingTests.m */; };
 		BC43F5AFB880EBD81F952073 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3608845DF2415FC68817239 /* libPods.a */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		2EE9B5211AA00CF100AC41D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2EE9B4FF1AA00CF000AC41D5 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2EE9B5061AA00CF000AC41D5;
-			remoteInfo = CustomLogFormatting;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		2EE9B5071AA00CF100AC41D5 /* CustomLogFormatting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomLogFormatting.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,9 +27,6 @@
 		2EE9B5151AA00CF100AC41D5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2EE9B5171AA00CF100AC41D5 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		2EE9B51A1AA00CF100AC41D5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		2EE9B5201AA00CF100AC41D5 /* CustomLogFormattingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CustomLogFormattingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2EE9B5251AA00CF100AC41D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2EE9B5261AA00CF100AC41D5 /* CustomLogFormattingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomLogFormattingTests.m; sourceTree = "<group>"; };
 		74D300D834A9A40959411D00 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		88A2D234B44DA0FE8C53D420 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		B3608845DF2415FC68817239 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -55,13 +41,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2EE9B51D1AA00CF100AC41D5 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -69,7 +48,6 @@
 			isa = PBXGroup;
 			children = (
 				2EE9B5091AA00CF100AC41D5 /* CustomLogFormatting */,
-				2EE9B5231AA00CF100AC41D5 /* CustomLogFormattingTests */,
 				2EE9B5081AA00CF100AC41D5 /* Products */,
 				9027E5A55E2624B1AC27E390 /* Pods */,
 				FF9CF11E815AD724E3A4825E /* Frameworks */,
@@ -80,7 +58,6 @@
 			isa = PBXGroup;
 			children = (
 				2EE9B5071AA00CF100AC41D5 /* CustomLogFormatting.app */,
-				2EE9B5201AA00CF100AC41D5 /* CustomLogFormattingTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -105,23 +82,6 @@
 			children = (
 				2EE9B50B1AA00CF100AC41D5 /* Info.plist */,
 				2EE9B50C1AA00CF100AC41D5 /* main.m */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		2EE9B5231AA00CF100AC41D5 /* CustomLogFormattingTests */ = {
-			isa = PBXGroup;
-			children = (
-				2EE9B5261AA00CF100AC41D5 /* CustomLogFormattingTests.m */,
-				2EE9B5241AA00CF100AC41D5 /* Supporting Files */,
-			);
-			path = CustomLogFormattingTests;
-			sourceTree = "<group>";
-		};
-		2EE9B5241AA00CF100AC41D5 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				2EE9B5251AA00CF100AC41D5 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -165,24 +125,6 @@
 			productReference = 2EE9B5071AA00CF100AC41D5 /* CustomLogFormatting.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2EE9B51F1AA00CF100AC41D5 /* CustomLogFormattingTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2EE9B52D1AA00CF100AC41D5 /* Build configuration list for PBXNativeTarget "CustomLogFormattingTests" */;
-			buildPhases = (
-				2EE9B51C1AA00CF100AC41D5 /* Sources */,
-				2EE9B51D1AA00CF100AC41D5 /* Frameworks */,
-				2EE9B51E1AA00CF100AC41D5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2EE9B5221AA00CF100AC41D5 /* PBXTargetDependency */,
-			);
-			name = CustomLogFormattingTests;
-			productName = CustomLogFormattingTests;
-			productReference = 2EE9B5201AA00CF100AC41D5 /* CustomLogFormattingTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -194,10 +136,6 @@
 				TargetAttributes = {
 					2EE9B5061AA00CF000AC41D5 = {
 						CreatedOnToolsVersion = 6.1.1;
-					};
-					2EE9B51F1AA00CF100AC41D5 = {
-						CreatedOnToolsVersion = 6.1.1;
-						TestTargetID = 2EE9B5061AA00CF000AC41D5;
 					};
 				};
 			};
@@ -215,7 +153,6 @@
 			projectRoot = "";
 			targets = (
 				2EE9B5061AA00CF000AC41D5 /* CustomLogFormatting */,
-				2EE9B51F1AA00CF100AC41D5 /* CustomLogFormattingTests */,
 			);
 		};
 /* End PBXProject section */
@@ -228,13 +165,6 @@
 				2EE9B5161AA00CF100AC41D5 /* Main.storyboard in Resources */,
 				2EE9B51B1AA00CF100AC41D5 /* LaunchScreen.xib in Resources */,
 				2EE9B5181AA00CF100AC41D5 /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2EE9B51E1AA00CF100AC41D5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,23 +214,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2EE9B51C1AA00CF100AC41D5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2EE9B5271AA00CF100AC41D5 /* CustomLogFormattingTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		2EE9B5221AA00CF100AC41D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2EE9B5061AA00CF000AC41D5 /* CustomLogFormatting */;
-			targetProxy = 2EE9B5211AA00CF100AC41D5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		2EE9B5141AA00CF100AC41D5 /* Main.storyboard */ = {
@@ -432,40 +346,6 @@
 			};
 			name = Release;
 		};
-		2EE9B52E1AA00CF100AC41D5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CustomLogFormattingTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CustomLogFormatting.app/CustomLogFormatting";
-			};
-			name = Debug;
-		};
-		2EE9B52F1AA00CF100AC41D5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CustomLogFormattingTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CustomLogFormatting.app/CustomLogFormatting";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -483,15 +363,6 @@
 			buildConfigurations = (
 				2EE9B52B1AA00CF100AC41D5 /* Debug */,
 				2EE9B52C1AA00CF100AC41D5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2EE9B52D1AA00CF100AC41D5 /* Build configuration list for PBXNativeTarget "CustomLogFormattingTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2EE9B52E1AA00CF100AC41D5 /* Debug */,
-				2EE9B52F1AA00CF100AC41D5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
