@@ -26,7 +26,7 @@
 #import <Foundation/Foundation.h>
 #import <CocoaLumberjack/CocoaLumberjack.h>
 
-typedef NS_OPTIONS(NSInteger, RMLogFormatterOptions) {
+typedef NS_OPTIONS(NSUInteger, RMLogFormatterOptions) {
     RMLogFormatterOptionsNone           = 0,
     RMLogFormatterOptionsWordWrap       = 1 << 0,
     RMLogFormatterOptionsTimestampShort = 1 << 1,
