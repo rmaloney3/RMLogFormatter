@@ -6,18 +6,13 @@
 //  Copyright (c) 2015 Ryan Maloney. All rights reserved.
 //
 
-#import "AppDelegate.h"
-#import <CocoaLumberjack/CocoaLumberjack.h>
 #import <RMLogFormatter/RMLogFormatter.h>
+
+#import "AppDelegate.h"
 
 static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 
-@interface AppDelegate ()
-
-@end
-
 @implementation AppDelegate
-
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     

@@ -23,8 +23,9 @@
 //  SOFTWARE.
 //
 
-#import "RMLogFormatter.h"
 #import <libkern/OSAtomic.h>
+
+#import "RMLogFormatter.h"
 
 static const NSUInteger RMLF_DEFAULT_LINE_LENGTH = 120;
 static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOptionsNone |
@@ -33,10 +34,6 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
                                                             RMLogFormatterOptionsFileName |
                                                             RMLogFormatterOptionsLineNumber |
                                                             RMLogFormatterOptionsThreadID;
-
-@interface RMLogFormatter ()
-
-@end
 
 @implementation RMLogFormatter {
     int _atomicLoggerCount;
@@ -91,8 +88,6 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     return _lineLength;
 }
 
-#pragma mark - RMLogFormatterOptions Getters
-
 - (BOOL)isTimestampEnabled {
     return !!(_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong));
 }
@@ -123,7 +118,6 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
 
 #pragma mark - Private
 
-// TODO: Convert to NSString Category
 - (NSString *)stringFromDate:(NSDate *)date {
     int32_t loggerCount = OSAtomicAdd32(0, &_atomicLoggerCount);
     
@@ -158,7 +152,6 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     }
 }
 
-// TODO: Convert to NSString Category
 - (NSString *)stringByRepeatingCharacter:(char)character length:(NSUInteger)length {
     char stringUtf8[length + 1];
     memset(stringUtf8, character, length * sizeof(*stringUtf8));
