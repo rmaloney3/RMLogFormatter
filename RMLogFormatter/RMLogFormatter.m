@@ -93,6 +93,36 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     return _lineLength;
 }
 
+#pragma mark - RMLogFormatterOptions Getters
+
+- (BOOL)isTimestampEnabled {
+    return !!(_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong));
+}
+
+- (BOOL)isLogFlagEnabled {
+    return !!(_logOptions & (RMLogFormatterOptionsLogFlagShort | RMLogFormatterOptionsLogFlagLong));
+}
+
+- (BOOL)isFileNameEnabled {
+    return !!(_logOptions & RMLogFormatterOptionsFileName);
+}
+
+- (BOOL)isMethodNameEnabled {
+    return !!(_logOptions & RMLogFormatterOptionsMethodName);
+}
+
+- (BOOL)isLineNumberEnabled {
+    return !!(_logOptions & RMLogFormatterOptionsLineNumber);
+}
+
+- (BOOL)isThreadNameEnabled {
+    return !!(_logOptions & RMLogFormatterOptionsThreadName);
+}
+
+- (BOOL)isThreadIDEnabled {
+    return !!(_logOptions & RMLogFormatterOptionsThreadID);
+}
+
 #pragma mark - Private
 
 // TODO: Convert to NSString Category
@@ -195,13 +225,13 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     
     NSMutableString *logStats = [NSMutableString string];
     
-    BOOL timestampEnabled = (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong));
-    BOOL logFlagEnabled = (_logOptions & (RMLogFormatterOptionsLogFlagShort | RMLogFormatterOptionsLogFlagLong));
-    BOOL fileNameEnabled = (_logOptions & RMLogFormatterOptionsFileName);
-    BOOL methodNameEnabled = (_logOptions & RMLogFormatterOptionsMethodName);
-    BOOL lineNumbersEnabled = (_logOptions & RMLogFormatterOptionsLineNumber);
-    BOOL threadNameEnabled = (_logOptions & RMLogFormatterOptionsThreadName) && logMessage.threadName.length;
-    BOOL threadIDEnabled = (_logOptions & RMLogFormatterOptionsThreadID);
+    BOOL timestampEnabled   = [self isTimestampEnabled];
+    BOOL logFlagEnabled     = [self isLogFlagEnabled];
+    BOOL fileNameEnabled    = [self isFileNameEnabled];
+    BOOL methodNameEnabled  = [self isMethodNameEnabled];
+    BOOL lineNumberEnabled  = [self isLineNumberEnabled];
+    BOOL threadNameEnabled  = [self isThreadNameEnabled] && logMessage.threadName.length;
+    BOOL threadIDEnabled    = [self isThreadIDEnabled];
     
     if (timestampEnabled) {
         [logStats appendString:[self stringFromDate:logMessage.timestamp]];
@@ -250,7 +280,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
         }
     }
     
-    if (lineNumbersEnabled) {
+    if (lineNumberEnabled) {
         if (fileNameEnabled | methodNameEnabled) {
             [logStats appendFormat:@":%lu", (unsigned long)logMessage.line];
         } else if (timestampEnabled | logFlagEnabled) {
@@ -261,7 +291,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     }
     
     if (threadNameEnabled) {
-        if (fileNameEnabled | methodNameEnabled | lineNumbersEnabled) {
+        if (fileNameEnabled | methodNameEnabled | lineNumberEnabled) {
             [logStats appendFormat:@" Thread:%@", logMessage.threadName];
         } else if (timestampEnabled | logFlagEnabled) {
             [logStats appendFormat:@" | Thread:%@", logMessage.threadName];
@@ -273,7 +303,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     if (threadIDEnabled) {
         if (threadNameEnabled) {
             [logStats appendFormat:@"(%@)", logMessage.threadID];
-        } else if (fileNameEnabled | methodNameEnabled | lineNumbersEnabled) {
+        } else if (fileNameEnabled | methodNameEnabled | lineNumberEnabled) {
             [logStats appendFormat:@" (TID:%@)", logMessage.threadID];
         } else if (timestampEnabled | logFlagEnabled) {
             [logStats appendFormat:@" | (TID:%@)", logMessage.threadID];

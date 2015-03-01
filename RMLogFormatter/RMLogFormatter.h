@@ -44,8 +44,16 @@ typedef NS_OPTIONS(NSInteger, RMLogFormatterOptions) {
 // TODO: Add customization flags to conditionally include addtional information
 @interface RMLogFormatter : NSObject <DDLogFormatter>
 
-@property (nonatomic, readonly) RMLogFormatterOptions options;
 @property (nonatomic, readonly) NSUInteger lineLength;
+@property (nonatomic, readonly) RMLogFormatterOptions options;
+
+@property (nonatomic, readonly) BOOL isTimestampEnabled;
+@property (nonatomic, readonly) BOOL isLogFlagEnabled;
+@property (nonatomic, readonly) BOOL isFileNameEnabled;
+@property (nonatomic, readonly) BOOL isMethodNameEnabled;
+@property (nonatomic, readonly) BOOL isLineNumberEnabled;
+@property (nonatomic, readonly) BOOL isThreadNameEnabled;
+@property (nonatomic, readonly) BOOL isThreadIDEnabled;
 
 - (instancetype)init;
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength;
