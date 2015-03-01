@@ -65,8 +65,6 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options {
     if (self = [super init]) {
         _logOptions = options;
-        
-        // Ensure minimum line length boundary is not exceeded.
         _lineLength = (logLineLength < 80) ? 80 : logLineLength;
         
         if (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong)) {
@@ -216,6 +214,34 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     return resultString;
 }
 
+#pragma mark - Log Stat String Builders
+
+- (NSString *)stringFromLogFlag:(DDLogFlag)logFlag {
+    BOOL shortLogFlagFormat = (_logOptions & RMLogFormatterOptionsLogFlagShort) == RMLogFormatterOptionsLogFlagShort;
+    
+    NSString *logFlagString;
+    
+    switch (logFlag) {
+        case DDLogFlagError:
+            logFlagString = shortLogFlagFormat ? @"E" : @"  Error";
+            break;
+        case DDLogFlagWarning:
+            logFlagString = shortLogFlagFormat ? @"W" : @"   Warn";
+            break;
+        case DDLogFlagInfo:
+            logFlagString = shortLogFlagFormat ? @"I" : @"   Info";
+            break;
+        case DDLogFlagDebug:
+            logFlagString = shortLogFlagFormat ? @"D" : @"  Debug";
+            break;
+        case DDLogFlagVerbose:
+            logFlagString = shortLogFlagFormat ? @"V" : @"Verbose";
+            break;
+    }
+
+    return logFlagString;
+}
+
 #pragma mark - DDLogFormatter Protocol
 
 - (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
@@ -238,24 +264,7 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     }
     
     if (logFlagEnabled) {
-        NSString *logFlag = @"";
-        switch (logMessage.flag) {
-            case DDLogFlagError:
-                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"E" : @"  Error";
-                break;
-            case DDLogFlagWarning:
-                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"W" : @"   Warn";
-                break;
-            case DDLogFlagInfo:
-                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"I" : @"   Info";
-                break;
-            case DDLogFlagDebug:
-                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"D" : @"  Debug";
-                break;
-            case DDLogFlagVerbose:
-                logFlag = (_logOptions & RMLogFormatterOptionsLogFlagShort) ? @"V" : @"Verbose";
-                break;
-        }
+        NSString *logFlag = [self stringFromLogFlag:logMessage.flag];
         
         if (timestampEnabled) {
             [logStats appendFormat:@" | %@", logFlag];
