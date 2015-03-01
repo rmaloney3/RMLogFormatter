@@ -252,11 +252,11 @@ static const RMLogFormatterOptions RMLF_DEFAULT_OPTIONS =   RMLogFormatterOption
     
     if (lineNumbersEnabled) {
         if (fileNameEnabled | methodNameEnabled) {
-            [logStats appendFormat:@":%lu", logMessage.line];
+            [logStats appendFormat:@":%lu", (unsigned long)logMessage.line];
         } else if (timestampEnabled | logFlagEnabled) {
-            [logStats appendFormat:@" | Line:%lu", logMessage.line];
+            [logStats appendFormat:@" | Line:%lu", (unsigned long)logMessage.line];
         } else {
-            [logStats appendFormat:@"Line:%lu", logMessage.line];
+            [logStats appendFormat:@"Line:%lu", (unsigned long)logMessage.line];
         }
     }
     
