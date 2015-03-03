@@ -1,6 +1,6 @@
 # RMLogFormatter
 
-[![Build Status](https://travis-ci.org/rmaloney3/RMLogFormatter.svg?branch=master)](https://travis-ci.org/rmaloney3/RMLogFormatter)
+[![Build Status](https://travis-ci.org/rmaloney3/RMLogFormatter.svg?branch=master)](https://travis-ci.org/rmaloney3/RMLogFormatter) [![Cocoapods](https://cocoapod-badges.herokuapp.com/v/RMLogFormatter/badge.png)](https://github.com/rmaloney3/RMLogFormatter/blob/master/RMLogFormatter.podspec) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/rmaloney3/RMLogFormatter/blob/master/LICENSE)
 
 `RMLogFormatter` is a customizable log formatter for [CocoaLumberjack](https://github.com/CocoaLumberjack/CocoaLumberjack).  The default log format is as follows:
 
