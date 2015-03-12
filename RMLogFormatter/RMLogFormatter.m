@@ -26,6 +26,7 @@
 #import <libkern/OSAtomic.h>
 
 #import "RMLogFormatter.h"
+#import "RMStringWordWrapper.h"
 
 static const NSUInteger RMLogFormatterMinimumLineLength = 80;
 static const NSUInteger RMLogFormatterDefaultLineLength = 120;
@@ -40,11 +41,11 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
     int _atomicLoggerCount;
     
     RMLogFormatterOptions _logOptions;
-    NSUInteger _lineLength;
     
     NSString *_logStatsFormatString;
-    
     NSDateFormatterStyle _dateFormatTimeStyle;
+    
+    RMStringWordWrapper *_stringWordWrapper;
 }
 
 #pragma mark - Initializers
@@ -64,7 +65,13 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options {
     if (self = [super init]) {
         _logOptions = options;
-        _lineLength = (logLineLength < RMLogFormatterMinimumLineLength) ? RMLogFormatterMinimumLineLength : logLineLength;
+        
+        NSUInteger lineLength = logLineLength;
+        if ((lineLength < RMLogFormatterMinimumLineLength)) {
+            lineLength = RMLogFormatterMinimumLineLength;
+        }
+        
+        _stringWordWrapper = [[RMStringWordWrapper alloc] initWithWordWrapLength:lineLength];
         
         _logStatsFormatString = [self logStatFormatStringFromLogFormatterOptions:_logOptions];
         
@@ -89,7 +96,7 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
 }
 
 - (NSUInteger)lineLength {
-    return _lineLength;
+    return _stringWordWrapper.wordWrapLength;
 }
 
 - (BOOL)isTimestampEnabled {
@@ -156,73 +163,6 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
         
         return [dateFormatter stringFromDate:date];
     }
-}
-
-- (NSString *)stringByRepeatingCharacter:(char)character length:(NSUInteger)length {
-    char stringUtf8[length + 1];
-    memset(stringUtf8, character, length * sizeof(*stringUtf8));
-    stringUtf8[length] = '\0';
-    
-    return [NSString stringWithUTF8String:stringUtf8];
-}
-
-- (BOOL)shouldString:(NSString *)string wrapAtLength:(NSUInteger)length {
-    return ((string.length > length) || [string containsString:@"\n"]);;
-}
-
-- (NSString *)wordWrapIndentStringWithLength:(NSUInteger)length {
-    return [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:length]];
-}
-
-- (NSScanner *)stringScannerForWordWrappingWithString:(NSString *)string {
-    NSScanner *scanner = [NSScanner scannerWithString:string];
-    scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
-    
-    return scanner;
-}
-
-- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)maxLineLength indentLength:(NSUInteger)indentLength {
-    if (![self shouldString:sourceString wrapAtLength:maxLineLength]) {
-        return sourceString;
-    }
-    
-    NSString *indentString = [self wordWrapIndentStringWithLength:indentLength];
-    
-    NSMutableString *resultString = [NSMutableString new];
-    NSMutableString *currentLineString = [NSMutableString new];
-    NSScanner *scanner = [self stringScannerForWordWrappingWithString:sourceString];
-
-    NSUInteger remainingLength = maxLineLength;
-    NSString *scannedString = nil;
-    while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString: &scannedString]) {
-        if (currentLineString.length + scannedString.length <= remainingLength) {
-            [currentLineString appendString:scannedString];
-        }
-        else if (currentLineString.length == 0) { // Newline but next word > currentLineLength
-            [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
-            remainingLength = maxLineLength - indentLength;
-        }
-        else { // Need to break line and start new one
-            [resultString appendFormat:@"%@%@", currentLineString, [scanner isAtEnd] ? @"" : indentString];
-            [currentLineString setString:[NSString stringWithString:scannedString]];
-            remainingLength = maxLineLength - indentLength;
-        }
-        
-        if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet] intoString:&scannedString]) {
-            if ([scannedString containsString:@"\n"]) {
-                [currentLineString appendString:[scannedString stringByReplacingOccurrencesOfString:@"\n" withString:indentString]];
-                [resultString appendString:currentLineString];
-                [currentLineString setString:@""];
-                remainingLength = maxLineLength - indentLength;
-            } else {
-                [currentLineString appendString:scannedString];
-            }
-        }
-    }
-    
-    [resultString appendString:currentLineString];
-    
-    return resultString;
 }
 
 #pragma mark - Log Stat String Builders
@@ -385,10 +325,10 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
     NSString *fullLogMessage = [NSString stringWithFormat:@"%@ : %@", logStatsString, logMessage.message];
     
     if (_logOptions & RMLogFormatterOptionsWordWrap) {
-        // FIXME: If indentLength is longer than _lineLength word wrap over-indents.
+        // FIXME: If indentLength is longer than wordWrapLength word wrap over-indents.
         NSUInteger indentLength = logStatsString.length + 3;
         
-        fullLogMessage = [self wrapString:fullLogMessage withLineLength:_lineLength indentLength:indentLength];
+        fullLogMessage = [_stringWordWrapper wrapString:fullLogMessage withIndentLength:indentLength];
     }
     
     return fullLogMessage;
