@@ -390,7 +390,7 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
 }
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"RMLogFormatter description:\n%@ lineLength: %zd\noptions: %@\nisTimestampEnabled: %i\nisLogFlagEnabled: %i\nisFileNameEnabled: %i\nisMethodNameEnabled: %i\nisLineNumberEnabled: %i\nisThreadNameEnabled: %i\nisThreadIDEnabled: %i\n",[super description], self.lineLength, self.options, self.isTimestampEnabled, self.isLogFlagEnabled, self.isFileNameEnabled, self.isMethodNameEnabled, self.isLineNumberEnabled, self.isThreadNameEnabled, self.isThreadIDEnabled];
+    return [NSString stringWithFormat:@"RMLogFormatter description:\n%@ lineLength: %zd\noptions: %lu\ntimestampEnabled: %i\nlogFlagEnabled: %i\nfileNameEnabled: %i\nmethodNameEnabled: %i\nlineNumberEnabled: %i\nthreadNameEnabled: %i\nthreadIDEnabled: %i\n",[super description], self.lineLength, self.options, self.timestampEnabled, self.logFlagEnabled, self.fileNameEnabled, self.methodNameEnabled, self.lineNumberEnabled, self.threadNameEnabled, self.threadIDEnabled];
 }
 
 @end

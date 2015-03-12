@@ -41,19 +41,18 @@ typedef NS_OPTIONS(NSUInteger, RMLogFormatterOptions) {
     RMLogFormatterOptionsLogFlagLong    = 1 << 10
 };
 
-// TODO: Add customization flags to conditionally include addtional information
 @interface RMLogFormatter : NSObject <DDLogFormatter>
 
 @property (nonatomic, readonly) NSUInteger lineLength;
 @property (nonatomic, readonly) RMLogFormatterOptions options;
 
-@property (nonatomic, readonly) BOOL isTimestampEnabled;
-@property (nonatomic, readonly) BOOL isLogFlagEnabled;
-@property (nonatomic, readonly) BOOL isFileNameEnabled;
-@property (nonatomic, readonly) BOOL isMethodNameEnabled;
-@property (nonatomic, readonly) BOOL isLineNumberEnabled;
-@property (nonatomic, readonly) BOOL isThreadNameEnabled;
-@property (nonatomic, readonly) BOOL isThreadIDEnabled;
+@property (nonatomic, readonly, getter=isTimestampEnabled) BOOL timestampEnabled;
+@property (nonatomic, readonly, getter=isLogFlagEnabled) BOOL logFlagEnabled;
+@property (nonatomic, readonly, getter=isFileNameEnabled) BOOL fileNameEnabled;
+@property (nonatomic, readonly, getter=isMethodNameEnabled) BOOL methodNameEnabled;
+@property (nonatomic, readonly, getter=isLineNumberEnabled) BOOL lineNumberEnabled;
+@property (nonatomic, readonly, getter=isThreadNameEnabled) BOOL threadNameEnabled;
+@property (nonatomic, readonly, getter=isThreadIDEnabled) BOOL threadIDEnabled;
 
 - (instancetype)init;
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength;
