@@ -145,13 +145,13 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
         NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
         NSDateFormatter *dateFormatter = [threadDictionary objectForKey:key];
         
-        if (dateFormatter == nil) {
+        if (!dateFormatter) {
             dateFormatter = [NSDateFormatter new];
             [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
             dateFormatter.dateStyle = NSDateFormatterNoStyle;
             dateFormatter.timeStyle = _dateFormatTimeStyle;
             
-            [threadDictionary setObject:dateFormatter forKey:key];
+            threadDictionary[key] = dateFormatter;
         }
         
         return [dateFormatter stringFromDate:date];
@@ -166,49 +166,61 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
     return [NSString stringWithUTF8String:stringUtf8];
 }
 
-- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)length indentLength:(NSUInteger)indentLength {
-    BOOL isMultiline = ((sourceString.length > length) || [sourceString containsString:@"\n"]);
+- (BOOL)shouldString:(NSString *)string wrapAtLength:(NSUInteger)length {
+    return ((string.length > length) || [string containsString:@"\n"]);;
+}
+
+- (NSString *)wordWrapIndentStringWithLength:(NSUInteger)length {
+    return [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:length]];
+}
+
+- (NSScanner *)stringScannerForWordWrappingWithString:(NSString *)string {
+    NSScanner *scanner = [NSScanner scannerWithString:string];
+    scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
     
-    if (!isMultiline) {
+    return scanner;
+}
+
+- (NSString *)wrapString:(NSString *)sourceString withLineLength:(NSUInteger)maxLineLength indentLength:(NSUInteger)indentLength {
+    if (![self shouldString:sourceString wrapAtLength:maxLineLength]) {
         return sourceString;
     }
     
-    NSUInteger maxLineLength = length;
+    NSString *indentString = [self wordWrapIndentStringWithLength:indentLength];
     
-    NSString *indentString = [NSString stringWithFormat:@"\n%@", [self stringByRepeatingCharacter:' ' length:indentLength]];
-    
-    NSMutableString *resultString = [[NSMutableString alloc] init];
-    NSMutableString *currentLine = [[NSMutableString alloc] init];
-    NSScanner *scanner = [NSScanner scannerWithString:sourceString];
-    scanner.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString:@""];
+    NSMutableString *resultString = [NSMutableString new];
+    NSMutableString *currentLineString = [NSMutableString new];
+    NSScanner *scanner = [self stringScannerForWordWrappingWithString:sourceString];
+
+    NSUInteger remainingLength = maxLineLength;
     NSString *scannedString = nil;
     while ([scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString: &scannedString]) {
-        if ([currentLine length] + [scannedString length] <= maxLineLength) {
-            [currentLine appendString:scannedString];
+        if (currentLineString.length + scannedString.length <= remainingLength) {
+            [currentLineString appendString:scannedString];
         }
-        else if ([currentLine length] == 0) { // Newline but next word > currentLineLength
+        else if (currentLineString.length == 0) { // Newline but next word > currentLineLength
             [resultString appendFormat:@"%@%@", scannedString, [scanner isAtEnd] ? @"" : indentString];
-            maxLineLength = length - indentLength;
+            remainingLength = maxLineLength - indentLength;
         }
         else { // Need to break line and start new one
-            [resultString appendFormat:@"%@%@", currentLine, [scanner isAtEnd] ? @"" : indentString];
-            [currentLine setString:[NSString stringWithString:scannedString]];
-            maxLineLength = length - indentLength;
+            [resultString appendFormat:@"%@%@", currentLineString, [scanner isAtEnd] ? @"" : indentString];
+            [currentLineString setString:[NSString stringWithString:scannedString]];
+            remainingLength = maxLineLength - indentLength;
         }
         
         if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet] intoString:&scannedString]) {
             if ([scannedString containsString:@"\n"]) {
-                [currentLine appendString:[scannedString stringByReplacingOccurrencesOfString:@"\n" withString:indentString]];
-                [resultString appendString:currentLine];
-                [currentLine setString:@""];
-                maxLineLength = length - indentLength;
+                [currentLineString appendString:[scannedString stringByReplacingOccurrencesOfString:@"\n" withString:indentString]];
+                [resultString appendString:currentLineString];
+                [currentLineString setString:@""];
+                remainingLength = maxLineLength - indentLength;
             } else {
-                [currentLine appendString:scannedString];
+                [currentLineString appendString:scannedString];
             }
         }
     }
     
-    [resultString appendString:currentLine];
+    [resultString appendString:currentLineString];
     
     return resultString;
 }
