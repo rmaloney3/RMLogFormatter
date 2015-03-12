@@ -388,5 +388,9 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
 - (void)willRemoveFromLogger:(id <DDLogger>)logger {
     OSAtomicDecrement32(&_atomicLoggerCount);
 }
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"RMLogFormatter description:\n%@ lineLength: %zd\noptions: %@\nisTimestampEnabled: %i\nisLogFlagEnabled: %i\nisFileNameEnabled: %i\nisMethodNameEnabled: %i\nisLineNumberEnabled: %i\nisThreadNameEnabled: %i\nisThreadIDEnabled: %i\n",[super description], self.lineLength, self.options, self.isTimestampEnabled, self.isLogFlagEnabled, self.isFileNameEnabled, self.isMethodNameEnabled, self.isLineNumberEnabled, self.isThreadNameEnabled, self.isThreadIDEnabled];
+}
 
 @end
