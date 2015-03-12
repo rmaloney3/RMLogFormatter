@@ -44,8 +44,7 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
     
     NSString *_logStatsFormatString;
     
-    NSString *_dateFormatString;
-    NSDateFormatter *_threadUnsafeDateFormatter;
+    NSDateFormatterStyle _dateFormatTimeStyle;
 }
 
 #pragma mark - Initializers
@@ -69,14 +68,14 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
         
         _logStatsFormatString = [self logStatFormatStringFromLogFormatterOptions:_logOptions];
         
-        if (_logOptions & (RMLogFormatterOptionsTimestampShort | RMLogFormatterOptionsTimestampLong)) {
+        if (self.timestampEnabled) {
             if (_logOptions & RMLogFormatterOptionsTimestampShort) {
-                _dateFormatString = @"HH:mm:ss.SSS";
+                _dateFormatTimeStyle = NSDateFormatterShortStyle;
             } else {
-                _dateFormatString = @"yyyy-MM-dd HH:mm:ss.SSS";
+                _dateFormatTimeStyle = NSDateFormatterLongStyle;
             }
         } else {
-            _dateFormatString = nil;
+            _dateFormatTimeStyle = NSDateFormatterNoStyle;
         }
     }
     
@@ -128,27 +127,29 @@ static const RMLogFormatterOptions RMLogFormatterDefaultOptions =   RMLogFormatt
     
     if (loggerCount <= 1) {
         // Single-threaded mode.
+        static NSDateFormatter *threadUnsafeDateFormatter;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            threadUnsafeDateFormatter = [NSDateFormatter new];
+            threadUnsafeDateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
+            threadUnsafeDateFormatter.dateStyle = NSDateFormatterNoStyle;
+            threadUnsafeDateFormatter.timeStyle = _dateFormatTimeStyle;
+        });
         
-        if (_threadUnsafeDateFormatter == nil) {
-            _threadUnsafeDateFormatter = [[NSDateFormatter alloc] init];
-            [_threadUnsafeDateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-            [_threadUnsafeDateFormatter setDateFormat:_dateFormatString];
-        }
-        
-        return [_threadUnsafeDateFormatter stringFromDate:date];
+        return [threadUnsafeDateFormatter stringFromDate:date];
     } else {
         // Multi-threaded mode.
         // NSDateFormatter is NOT thread-safe.
-        
         NSString *key = @"RMInfoFormatter_NSDateFormatter";
         
         NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
         NSDateFormatter *dateFormatter = [threadDictionary objectForKey:key];
         
         if (dateFormatter == nil) {
-            dateFormatter = [[NSDateFormatter alloc] init];
+            dateFormatter = [NSDateFormatter new];
             [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-            [dateFormatter setDateFormat:_dateFormatString];
+            dateFormatter.dateStyle = NSDateFormatterNoStyle;
+            dateFormatter.timeStyle = _dateFormatTimeStyle;
             
             [threadDictionary setObject:dateFormatter forKey:key];
         }
