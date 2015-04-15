@@ -81,7 +81,7 @@ static const NSUInteger RMStringWordWrapperDefaultWordWrapLength = 80;
         }
         
         if ([scanner scanUpToCharactersFromSet:[[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet] intoString:&scannedString]) {
-            if ([scannedString containsString:@"\n"]) {
+            if ([scannedString rangeOfString:@"\n"].location != NSNotFound) {
                 [currentLineString appendString:[scannedString stringByReplacingOccurrencesOfString:@"\n" withString:indentString]];
                 [resultString appendString:currentLineString];
                 [currentLineString setString:@""];
@@ -100,7 +100,7 @@ static const NSUInteger RMStringWordWrapperDefaultWordWrapLength = 80;
 #pragma mark - Private Methods
 
 - (BOOL)shouldString:(NSString *)string wrapAtLength:(NSUInteger)length {
-    return ((string.length > length) || [string containsString:@"\n"]);;
+    return ((string.length > length) ||  [string rangeOfString:@"\n"].location != NSNotFound);;
 }
 
 - (NSString *)stringByRepeatingCharacter:(char)character length:(NSUInteger)length {
