@@ -26,20 +26,7 @@
 #import <Foundation/Foundation.h>
 #import <CocoaLumberjack/CocoaLumberjack.h>
 
-typedef NS_OPTIONS(NSUInteger, RMLogFormatterOptions) {
-    RMLogFormatterOptionsNone           = 0,
-    RMLogFormatterOptionsWordWrap       = 1 << 0,
-    RMLogFormatterOptionsTimestampShort = 1 << 1,
-    RMLogFormatterOptionsTimestampLong  = 1 << 2,
-    RMLogFormatterOptionsFilePath       = 1 << 3,
-    RMLogFormatterOptionsFileName       = 1 << 4,
-    RMLogFormatterOptionsMethodName     = 1 << 5,
-    RMLogFormatterOptionsLineNumber     = 1 << 6,
-    RMLogFormatterOptionsThreadName     = 1 << 7,
-    RMLogFormatterOptionsThreadID       = 1 << 8,
-    RMLogFormatterOptionsLogFlagShort   = 1 << 9,
-    RMLogFormatterOptionsLogFlagLong    = 1 << 10
-};
+#import "RMLogFormatterOptions.h"
 
 @interface RMLogFormatter : NSObject <DDLogFormatter>
 
