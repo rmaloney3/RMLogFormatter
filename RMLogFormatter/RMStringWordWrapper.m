@@ -100,7 +100,7 @@ static const NSUInteger RMStringWordWrapperDefaultWordWrapLength = 80;
 #pragma mark - Private Methods
 
 - (BOOL)shouldString:(NSString *)string wrapAtLength:(NSUInteger)length {
-    return ((string.length > length) ||  [string rangeOfString:@"\n"].location != NSNotFound);;
+    return ((string.length > length) || [string rangeOfString:@"\n"].location != NSNotFound);
 }
 
 - (NSString *)stringByRepeatingCharacter:(char)character length:(NSUInteger)length {
