@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "RMLogFormatter"
-  s.version          = "0.1.1"
+  s.version          = "0.1.2"
   s.summary          = "An informative, concise, and configurable CocoaLumberjack log formatter."
   s.description      = <<-DESC
                        RMLogFormatter is a configurable, word wrapping CocoaLumberjack log formatter.  The default log format is as follows:
