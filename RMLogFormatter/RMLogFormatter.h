@@ -57,6 +57,6 @@ typedef NS_OPTIONS(NSUInteger, RMLogFormatterOptions) {
 - (instancetype)init;
 - (instancetype)initWithLogLineLength:(NSUInteger)logLineLength;
 - (instancetype)initWithOptions:(RMLogFormatterOptions)options;
-- (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options;
+- (instancetype)initWithLogLineLength:(NSUInteger)logLineLength options:(RMLogFormatterOptions)options NS_DESIGNATED_INITIALIZER;
 
 @end

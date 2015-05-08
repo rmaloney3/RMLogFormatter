@@ -29,7 +29,8 @@
 
 @property (nonatomic, readonly) NSUInteger wordWrapLength;
 
-- (instancetype)initWithWordWrapLength:(NSUInteger)length;
+- (instancetype)init;
+- (instancetype)initWithWordWrapLength:(NSUInteger)length NS_DESIGNATED_INITIALIZER;
 
 - (NSString *)wrapString:(NSString *)string;
 - (NSString *)wrapString:(NSString *)string withIndentLength:(NSUInteger)indentLength;
